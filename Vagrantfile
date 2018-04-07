@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
     $script_install_common_software = <<SCRIPT
     sudo apt-get update
     sudo apt-get upgrade -y
-    sudo apt-get install -y docker.io vim nano
+    sudo apt-get install -y docker.io vim nano htop
     sudo apt-get install -y apt-transport-https
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
@@ -37,6 +37,9 @@ SCRIPT
     sudo kubectl apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
     #sudo kubeadm token list | sed -n '2p' | awk 'BEGIN { FS=" " } { print $1 }' > /vagrant/token.log
     sudo kubeadm token create --print-join-command >> /vagrant/workerjoin.log
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
 SCRIPT
 
     $script_setup_worker = <<SCRIPT
