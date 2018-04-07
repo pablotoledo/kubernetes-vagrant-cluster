@@ -16,8 +16,8 @@ Vagrant.configure("2") do |config|
     
     config.hostmanager.enabled = true
 
-    #config.vm.synced_folder ".", "/vagrant", type: "virtualbox", disabled: false,
-    #rsync__exclude: ".git/"
+    config.vm.synced_folder ".", "/vagrant", type: "virtualbox", disabled: false,
+    rsync__exclude: ".git/"
 
     $script_install_common_software = <<SCRIPT
     sudo apt-get update
@@ -32,6 +32,23 @@ EOF
     sudo apt-get install -y kubelet kubeadm kubectl
 SCRIPT
 
+    $script_generate_ssh_key = <<SCRIPT
+    echo Updateing credentials
+    if [ ! -f /home/vagrant/.ssh/id_rsa ]; then
+        ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/id_rsa
+    fi
+        cp /home/vagrant/.ssh/id_rsa.pub /vagrant/control.pub
+
+        cat << 'SSHEOF' > /home/vagrant/.ssh/config
+    Host *
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    SSHEOF
+        chown -R vagrant:vagrant /home/vagrant/.ssh/
+SCRIPT
+
+    $script_copy_key = 'cat /vagrant/control.pub >> /home/vagrant/.ssh/authorized_keys'
+
     config.vm.define "k8s-master" do |h|
         h.vm.box = "ubuntu/xenial64"
         h.vm.hostname = "master.k8s.int"
@@ -41,7 +58,8 @@ SCRIPT
             vb.customize ["modifyvm", :id, "--cpus", "4"]
             vb.name = "k8s-master"
         end
-        h.vm.provision "shell", inline: $script_install_common_software 
+        h.vm.provision "shell", inline: $script_install_common_software
+        h.vm.provision "shell", inline: $script_generate_ssh_key 
     end
 
     config.vm.define "k8s-worker1" do |h|
@@ -54,6 +72,7 @@ SCRIPT
             vb.name = "k8s-worker1"
         end
         h.vm.provision "shell", inline: $script_install_common_software 
+        h.vm.provision "shell", inline: $script_copy_key
     end
 
     config.vm.define "k8s-worker2" do |h|
@@ -66,6 +85,7 @@ SCRIPT
             vb.name = "k8s-worker2"
         end
         h.vm.provision "shell", inline: $script_install_common_software 
+        h.vm.provision "shell", inline: $script_copy_key
     end
     
 
