@@ -5,13 +5,11 @@
 #
 # Getting Started:
 # 1. vagrant plugin install vagrant-hostmanager
-#       If you are running this Vagrantfile behind a corporate proxy: 
-#           vagrant plugin install vagrant-proxyconf
-# 2. vagrant up
-# 3. vagrant ssh
+# 2. vagrant plugin install vagrant-vbguest
+# 3. vagrant up
 #
 # This should put you at the control host
-#  with access, by name, to other vms - vagrant plugin install vagrant-vbguest
+#  with access, by name, to other vms - 
 Vagrant.configure("2") do |config|
     
     config.hostmanager.enabled = true
