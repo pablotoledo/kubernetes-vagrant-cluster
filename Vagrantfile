@@ -11,7 +11,7 @@
 # 3. vagrant ssh
 #
 # This should put you at the control host
-#  with access, by name, to other vms
+#  with access, by name, to other vms - vagrant plugin install vagrant-vbguest
 Vagrant.configure("2") do |config|
     
     config.hostmanager.enabled = true
@@ -20,20 +20,33 @@ Vagrant.configure("2") do |config|
     rsync__exclude: ".git/"
 
     $script_install_common_software = <<SCRIPT
-    sudo apt-get update
-    sudo apt-get upgrade -y
-    sudo apt-get install -y docker.io vim nano htop
-    sudo apt-get install -y apt-transport-https
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-deb http://apt.kubernetes.io/ kubernetes-xenial main
+    sudo yum upgrade -y
+    sudo yum install -y go git wget docker
+    sudo systemctl enable docker 
+    sudo systemctl start docker
+    sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
-    sudo apt-get update
-    sudo apt-get install -y kubelet kubeadm kubectl
+    sudo setenforce 0
+    sudo swapoff -a 
+    sudo rm /etc/fstab
+    sudo yum install -y kubelet kubeadm kubectl
+    sudo systemctl enable kubelet 
+    sudo systemctl start kubelet
 SCRIPT
 
     $script_setup_master = <<SCRIPT
-    sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-advertise-address=192.168.40.10
+    sudo go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
+    sudo bash -c "echo net.bridge.bridge-nf-call-ip6tables = 1 >> /etc/sysctl.conf"
+    sudo bash -c "echo net.bridge.bridge-nf-call-iptables = 1 >> /etc/sysctl.conf"
+    sudo sysctl --system
+    sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-advertise-address=192.168.40.10 
     sudo kubectl apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
     #sudo kubeadm token list | sed -n '2p' | awk 'BEGIN { FS=" " } { print $1 }' > /vagrant/token.log
     sudo kubeadm token create --print-join-command >> /vagrant/workerjoin.log
@@ -57,16 +70,16 @@ SCRIPT
     Host *
     StrictHostKeyChecking no
     UserKnownHostsFile=/dev/null
-    SSHEOF
-        chown -R vagrant:vagrant /home/vagrant/.ssh/
+SSHEOF
+        sudo chown -R vagrant:vagrant /home/vagrant/.ssh/
 SCRIPT
 
     $script_copy_key = 'cat /vagrant/control.pub >> /home/vagrant/.ssh/authorized_keys'
 
     config.vm.define "k8s-master" do |h|
-        h.vm.box = "ubuntu/xenial64"
+        h.vm.box = "centos/7"
         h.vm.hostname = "master.k8s.int"
-        h.vm.network "private_network", ip: "192.168.40.10"
+        h.vm.network "private_network", ip: "192.168.40.10", auto_config: true
         h.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "4096"]
             vb.customize ["modifyvm", :id, "--cpus", "4"]
@@ -78,9 +91,9 @@ SCRIPT
     end
 
     config.vm.define "k8s-worker1" do |h|
-        h.vm.box = "ubuntu/xenial64"
+        h.vm.box = "centos/7"
         h.vm.hostname = "worker1.k8s.int"
-        h.vm.network "private_network", ip: "192.168.40.11"
+        h.vm.network "private_network", ip: "192.168.40.11", auto_config: true
         h.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "4096"]
             vb.customize ["modifyvm", :id, "--cpus", "4"]
@@ -88,13 +101,13 @@ SCRIPT
         end
         h.vm.provision "shell", inline: $script_copy_key
         h.vm.provision "shell", inline: $script_install_common_software 
-        h.vm.provision "shell", inline: $script_setup_worker
+        #h.vm.provision "shell", inline: $script_setup_worker
     end
 
     config.vm.define "k8s-worker2" do |h|
-        h.vm.box = "ubuntu/xenial64"
+        h.vm.box = "centos/7"
         h.vm.hostname = "worker2.k8s.int"
-        h.vm.network "private_network", ip: "192.168.40.12"
+        h.vm.network "private_network", ip: "192.168.40.12", auto_config: true
         h.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "4096"]
             vb.customize ["modifyvm", :id, "--cpus", "4"]
@@ -102,7 +115,7 @@ SCRIPT
         end
         h.vm.provision "shell", inline: $script_copy_key
         h.vm.provision "shell", inline: $script_install_common_software 
-        h.vm.provision "shell", inline: $script_setup_worker
+        #h.vm.provision "shell", inline: $script_setup_worker
     end
     
 
