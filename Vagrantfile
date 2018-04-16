@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
     sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes\\$basearch
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\\$basearch
 enabled=1
 gpgcheck=1
 repo_gpgcheck=1
@@ -72,6 +72,12 @@ SSHEOF
         sudo chown -R vagrant:vagrant /home/vagrant/.ssh/
 SCRIPT
 
+    $script_solve_network_issues = <<SCRIPT
+    # https://github.com/kubernetes/kubernetes/issues/62256
+    sudo echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
+SCRIPT
+
     $script_copy_key = 'cat /vagrant/control.pub >> /home/vagrant/.ssh/authorized_keys'
 
     config.vm.define "k8s-master" do |h|
@@ -85,7 +91,8 @@ SCRIPT
         end
         h.vm.provision "shell", inline: $script_generate_ssh_key 
         h.vm.provision "shell", inline: $script_install_common_software
-        h.vm.provision "shell", inline: $script_setup_master
+        h.vm.provision "shell", inline: $script_solve_network_issues 
+        #h.vm.provision "shell", inline: $script_setup_master
     end
 
     config.vm.define "k8s-worker1" do |h|
@@ -99,6 +106,7 @@ SCRIPT
         end
         h.vm.provision "shell", inline: $script_copy_key
         h.vm.provision "shell", inline: $script_install_common_software 
+        h.vm.provision "shell", inline: $script_solve_network_issues 
         #h.vm.provision "shell", inline: $script_setup_worker
     end
 
@@ -113,6 +121,7 @@ SCRIPT
         end
         h.vm.provision "shell", inline: $script_copy_key
         h.vm.provision "shell", inline: $script_install_common_software 
+        h.vm.provision "shell", inline: $script_solve_network_issues 
         #h.vm.provision "shell", inline: $script_setup_worker
     end
     
