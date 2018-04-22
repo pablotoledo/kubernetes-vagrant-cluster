@@ -49,11 +49,16 @@ SCRIPT
     #sudo kubeadm token list | sed -n '2p' | awk 'BEGIN { FS=" " } { print $1 }' > /vagrant/token.log
     sudo kubeadm token create --print-join-command >> /vagrant/workerjoin.log
     mkdir -p $HOME/.kube
-    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    sudo cp /etc/kubernetes/admin.conf $HOME/
+    sudo chown $(id -u):$(id -g) $HOME/admin.conf
+    export KUBECONFIG=$HOME/admin.conf
 SCRIPT
 
     $script_setup_worker = <<SCRIPT
+    sudo go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
+    sudo bash -c "echo net.bridge.bridge-nf-call-ip6tables = 1 >> /etc/sysctl.conf"
+    sudo bash -c "echo net.bridge.bridge-nf-call-iptables = 1 >> /etc/sysctl.conf"
+    sudo sysctl --system
     sudo bash /vagrant/workerjoin.log
 SCRIPT
 
@@ -92,7 +97,7 @@ SCRIPT
         h.vm.provision "shell", inline: $script_generate_ssh_key 
         h.vm.provision "shell", inline: $script_install_common_software
         h.vm.provision "shell", inline: $script_solve_network_issues 
-        #h.vm.provision "shell", inline: $script_setup_master
+        h.vm.provision "shell", inline: $script_setup_master
     end
 
     config.vm.define "k8s-worker1" do |h|
@@ -107,7 +112,7 @@ SCRIPT
         h.vm.provision "shell", inline: $script_copy_key
         h.vm.provision "shell", inline: $script_install_common_software 
         h.vm.provision "shell", inline: $script_solve_network_issues 
-        #h.vm.provision "shell", inline: $script_setup_worker
+        h.vm.provision "shell", inline: $script_setup_worker
     end
 
     config.vm.define "k8s-worker2" do |h|
@@ -122,7 +127,7 @@ SCRIPT
         h.vm.provision "shell", inline: $script_copy_key
         h.vm.provision "shell", inline: $script_install_common_software 
         h.vm.provision "shell", inline: $script_solve_network_issues 
-        #h.vm.provision "shell", inline: $script_setup_worker
+        h.vm.provision "shell", inline: $script_setup_worker
     end
     
 
