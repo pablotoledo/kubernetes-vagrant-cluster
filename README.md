@@ -1,4 +1,3 @@
-"""
 # Kubernetes Cluster Setup with Vagrant
 
 This repository provides the necessary tools and scripts to set up a Kubernetes cluster on-premise using Vagrant. Designed for educational purposes, it offers insights into the configuration and deployment of a Kubernetes cluster in a local environment.
@@ -71,4 +70,3 @@ Feel free to fork this repository, make changes, and submit pull requests. Any f
 
 ## License
 This project is open-sourced under the MIT License.
-"""
