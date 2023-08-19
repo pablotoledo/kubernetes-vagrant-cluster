@@ -1,134 +1,80 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
+# List of required plugins for this Vagrant setup
+required_plugins = %w[vagrant-reload]
+needs_restart = false
 
-# README
-#
-# Getting Started:
-# 1. vagrant plugin install vagrant-hostmanager
-# 2. vagrant plugin install vagrant-vbguest
-# 3. vagrant up
-#
-# This should put you at the control host
-#  with access, by name, to other vms - 
+# Install any missing plugins from the required list
+required_plugins.each do |plugin|
+  unless Vagrant.has_plugin?(plugin)
+    system "vagrant plugin install #{plugin}"
+    needs_restart = true
+  end
+end
+
+# If any plugins were installed, prompt the user to rerun the command
+if needs_restart
+  puts "Plugins installed. Please run the command again."
+  exit
+end
+
+# Vagrant configuration starts here
 Vagrant.configure("2") do |config|
-    
-    config.hostmanager.enabled = true
+  
+  # Define the box to be used and its settings
+  config.vm.box = "fedora/38-cloud-base"
+  # Define the synced folder from the host to the guest
+  config.vm.synced_folder ".", "/vagrant", disabled: false
 
-    config.vm.synced_folder ".", "/vagrant", type: "virtualbox", disabled: false,
-    rsync__exclude: ".git/"
+  # General settings for the VirtualBox provider
+  config.vm.provider "virtualbox" do |v|
+    v.default_nic_type = "82540EM"
+    v.linked_clone = true
+  end
 
-    $script_install_common_software = <<SCRIPT
-    sudo yum upgrade -y
-    sudo yum install -y go git wget docker
-    sudo systemctl enable docker 
-    sudo systemctl start docker
-    sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\\$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOF
-    sudo setenforce 0
-    sudo swapoff -a 
-    sudo rm /etc/fstab
-    sudo yum install -y kubelet kubeadm kubectl
-    sudo systemctl enable kubelet 
-    sudo systemctl start kubelet
-SCRIPT
+  # More specific settings for the VirtualBox provider 
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = "1024"   # Assign 1GB RAM to the VM
+    vb.cpus = 2   # Assign 2 CPUs to the VM
+    vb.default_nic_type = "82540EM"
+    # Allow the creation of symbolic links in shared folders
+    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+    # Specify the VRDE (VirtualBox Remote Desktop Extension) port range
+    vb.customize ["modifyvm", :id, "--vrdeport", "10001-20000"]
+    # Set VRDE IP address binding
+    vb.customize ["modifyvm", :id, "--vrdeaddress", "0.0.0.0"]
+    # Allow bidirectional clipboard access between host and VM
+    vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+  end
 
-    $script_setup_master = <<SCRIPT
-    sudo go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
-    sudo bash -c "echo net.bridge.bridge-nf-call-ip6tables = 1 >> /etc/sysctl.conf"
-    sudo bash -c "echo net.bridge.bridge-nf-call-iptables = 1 >> /etc/sysctl.conf"
-    sudo sysctl --system
-    sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-advertise-address=192.168.40.10 
-    sudo kubectl apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
-    #sudo kubeadm token list | sed -n '2p' | awk 'BEGIN { FS=" " } { print $1 }' > /vagrant/token.log
-    sudo kubeadm token create --print-join-command >> /vagrant/workerjoin.log
-    mkdir -p $HOME/.kube
-    sudo cp /etc/kubernetes/admin.conf $HOME/
-    sudo chown $(id -u):$(id -g) $HOME/admin.conf
-    export KUBECONFIG=$HOME/admin.conf
-SCRIPT
-
-    $script_setup_worker = <<SCRIPT
-    sudo go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
-    sudo bash -c "echo net.bridge.bridge-nf-call-ip6tables = 1 >> /etc/sysctl.conf"
-    sudo bash -c "echo net.bridge.bridge-nf-call-iptables = 1 >> /etc/sysctl.conf"
-    sudo sysctl --system
-    sudo bash /vagrant/workerjoin.log
-SCRIPT
-
-    $script_generate_ssh_key = <<SCRIPT
-    echo Updateing credentials
-    if [ ! -f /home/vagrant/.ssh/id_rsa ]; then
-        ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/id_rsa
-    fi
-        cp /home/vagrant/.ssh/id_rsa.pub /vagrant/control.pub
-
-        cat << 'SSHEOF' > /home/vagrant/.ssh/config
-    Host *
-    StrictHostKeyChecking no
-    UserKnownHostsFile=/dev/null
-SSHEOF
-        sudo chown -R vagrant:vagrant /home/vagrant/.ssh/
-SCRIPT
-
-    $script_solve_network_issues = <<SCRIPT
-    # https://github.com/kubernetes/kubernetes/issues/62256
-    sudo echo "nameserver 8.8.8.8" > /etc/resolv.conf
-
-SCRIPT
-
-    $script_copy_key = 'cat /vagrant/control.pub >> /home/vagrant/.ssh/authorized_keys'
-
-    config.vm.define "k8s-master" do |h|
-        h.vm.box = "centos/7"
-        h.vm.hostname = "master.k8s.int"
-        h.vm.network "private_network", ip: "192.168.40.10", auto_config: true
-        h.vm.provider :virtualbox do |vb|
-            vb.customize ["modifyvm", :id, "--memory", "4096"]
-            vb.customize ["modifyvm", :id, "--cpus", "4"]
-            vb.name = "k8s-master"
-        end
-        h.vm.provision "shell", inline: $script_generate_ssh_key 
-        h.vm.provision "shell", inline: $script_install_common_software
-        h.vm.provision "shell", inline: $script_solve_network_issues 
-        h.vm.provision "shell", inline: $script_setup_master
+  # Master node configuration
+  config.vm.define "k8s-master" do |master|
+    master.vm.hostname = "k8s-master"
+    # Network settings for the master node
+    master.vm.network "public_network", bridge: "Realtek 8812BU Wireless LAN 802.11ac USB NIC", ip: "192.168.0.70"
+    master.vm.provider "virtualbox" do |vb|
+      vb.memory = "8192"   # Assign 8GB RAM to the master VM
+      vb.cpus = 4   # Assign 4 CPUs to the master VM
+      vb.name = "k8s-master"
     end
+    # Provision the VM using shell scripts and other provisioning methods
+    master.vm.provision "shell", path: "node.sh", args: ["k8s-master", "192.168.0.70"]
+    master.vm.provision :reload
+    master.vm.provision "shell", path: "master.sh"
+  end
 
-    config.vm.define "k8s-worker1" do |h|
-        h.vm.box = "centos/7"
-        h.vm.hostname = "worker1.k8s.int"
-        h.vm.network "private_network", ip: "192.168.40.11", auto_config: true
-        h.vm.provider :virtualbox do |vb|
-            vb.customize ["modifyvm", :id, "--memory", "4096"]
-            vb.customize ["modifyvm", :id, "--cpus", "4"]
-            vb.name = "k8s-worker1"
-        end
-        h.vm.provision "shell", inline: $script_copy_key
-        h.vm.provision "shell", inline: $script_install_common_software 
-        h.vm.provision "shell", inline: $script_solve_network_issues 
-        h.vm.provision "shell", inline: $script_setup_worker
+  # Worker nodes configuration
+  (1..2).each do |i|
+    config.vm.define "k8s-node-#{i}" do |node|
+      node.vm.hostname = "k8s-node-#{i}"
+      # Network settings for the worker nodes
+      node.vm.network "public_network", bridge: "Realtek 8812BU Wireless LAN 802.11ac USB NIC", ip: "192.168.0.#{70 + i}"
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = "12288"   # Assign 12GB RAM to each worker VM
+        vb.cpus = 8   # Assign 8 CPUs to each worker VM
+        vb.name = "k8s-node-#{i}"
+      end
+      # Provision the VM using shell scripts
+      node.vm.provision "shell", path: "node.sh", args: ["k8s-node-#{i}", "192.168.0.#{70 + i}"]
+      node.vm.provision :reload
     end
-
-    config.vm.define "k8s-worker2" do |h|
-        h.vm.box = "centos/7"
-        h.vm.hostname = "worker2.k8s.int"
-        h.vm.network "private_network", ip: "192.168.40.12", auto_config: true
-        h.vm.provider :virtualbox do |vb|
-            vb.customize ["modifyvm", :id, "--memory", "4096"]
-            vb.customize ["modifyvm", :id, "--cpus", "4"]
-            vb.name = "k8s-worker2"
-        end
-        h.vm.provision "shell", inline: $script_copy_key
-        h.vm.provision "shell", inline: $script_install_common_software 
-        h.vm.provision "shell", inline: $script_solve_network_issues 
-        h.vm.provision "shell", inline: $script_setup_worker
-    end
-    
-
+  end
 end
