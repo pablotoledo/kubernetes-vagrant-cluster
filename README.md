@@ -29,7 +29,7 @@ The proposed Kubernetes cluster setup comprises:
 1. **Master Node (k8s-master)**:
     - The control plane node that manages the Kubernetes cluster.
     - Configured with more resources to effectively manage the cluster operations.
-    - IP: `192.168.0.78`
+    - IP: `192.168.0.70`
 
 2. **Worker Nodes (k8s-node-1, k8s-node-2)**:
     - Nodes where your applications will run.
