@@ -62,6 +62,23 @@ The nodes in this cluster are provisioned using **Fedora 38**. Fedora was chosen
 4. Run `vagrant up` to start and provision the virtual machines.
 5. Once the VMs are up and running, your Kubernetes cluster should be operational.
 
+## Node Joining Procedure
+
+To join a node to the Kubernetes cluster, you'll use the `kubeadm join` command. The general structure of the command is as follows:
+
+```bash
+kubeadm join [MASTER_IP]:[PORT] --token [TOKEN] --discovery-token-ca-cert-hash [HASH] --apiserver-advertise-address=[NODE_IP]
+```
+
+For example, if you wish to join `k8s-node-1` to the cluster, you'll run the following command on the node:
+
+```bash
+kubeadm join 192.168.0.70:6443 --token ye7mrv.wb3y5tvfml5h28i6 --discovery-token-ca-cert-hash sha256:54b4d8feb39efdad99a55c365b3cd6be3e746f15230736e4d73f6784bd875ce7 --apiserver-advertise-address=192.168.0.71
+```
+
+Important: When specifying the `--apiserver-advertise-address` flag, it's essential to declare the domestic network IP assigned to the node. Failing to do so might cause the node to use the eth0 network, which Vagrant employs. This oversight can lead to issues on the master node because eth0 has the same IP on all machines. As a result, the master might refer to itself, causing connectivity issues.
+
+
 ## Note
 Please remember, this setup is designed for educational purposes. It's crucial to understand each script's workings and modify them according to your specific requirements before deploying in any other environment.
 
