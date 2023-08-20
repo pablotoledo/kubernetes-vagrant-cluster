@@ -38,10 +38,15 @@ kubectl apply -f calico.yaml
 sleep 30
 
 # Display the current state of the nodes in the Kubernetes cluster.
-kubectl get nodes 
+kubectl get nodes -o wide
 
 # Wait for another minute.
 sleep 60
 
 # Display the current state of all pods across all namespaces in the Kubernetes cluster.
-kubectl get pods -A 
+kubectl get pods -A -o wide
+
+# Prepare the 'vagrant' user to use kubectl by copying over the Kubernetes admin configuration.
+mkdir -p /home/vagrant/.kube
+cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+chown -R vagrant:vagrant /home/vagrant/.kube

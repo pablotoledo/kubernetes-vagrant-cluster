@@ -17,7 +17,7 @@ sudo setenforce 0
 sudo sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 
 # Upgrade & Clean package cache.
-sudo dnf update -y
+# sudo dnf update -y
 dnf clean packages
 
 # Set the system hostname.
@@ -50,7 +50,8 @@ dnf install -y wget kubernetes-kubeadm kubernetes-node kubernetes-client cri-too
 sed -i 's/^KUBELET_ADDRESS=.*/KUBELET_ADDRESS="--address=0.0.0.0"/' /etc/kubernetes/kubelet
 sed -i 's/^#KUBELET_PORT=.*/KUBELET_PORT="--port=10250"/' /etc/kubernetes/kubelet
 sed -i "s/^KUBELET_HOSTNAME=.*/KUBELET_HOSTNAME=\"--hostname-override=${HOSTNAME}\"/" /etc/kubernetes/kubelet
-sed -i '/\[Service\]/a Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=systemd --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock"' /etc/systemd/system/kubelet.service.d/kubeadm.conf
+sed -i '/KUBELET_EXTRA_ARGS=/d' /etc/systemd/system/kubelet.service.d/kubeadm.conf
+sed -i "/\[Service\]/a Environment=\"KUBELET_EXTRA_ARGS=--cgroup-driver=systemd --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --node-ip=${IP}\"" /etc/systemd/system/kubelet.service.d/kubeadm.conf
 
 # Disable the firewalld service.
 systemctl disable --now firewalld
@@ -64,11 +65,6 @@ touch /etc/resolv.conf
 # Initialize Kubernetes.
 sleep 20  # Pause for 20 seconds.
 systemctl enable kubelet
-
-# Prepare the 'vagrant' user to use kubectl by copying over the Kubernetes admin configuration.
-mkdir -p /home/vagrant/.kube
-cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
-chown -R vagrant:vagrant /home/vagrant/.kube
 
 # Enable SSH password authentication.
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
