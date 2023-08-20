@@ -17,7 +17,7 @@ sudo setenforce 0
 sudo sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 
 # Upgrade & Clean package cache.
-# sudo dnf update -y
+sudo dnf update -y
 dnf clean packages
 
 # Set the system hostname.
