@@ -51,8 +51,6 @@ sed -i 's/^KUBELET_ADDRESS=.*/KUBELET_ADDRESS="--address=0.0.0.0"/' /etc/kuberne
 sed -i 's/^#KUBELET_PORT=.*/KUBELET_PORT="--port=10250"/' /etc/kubernetes/kubelet
 sed -i "s/^KUBELET_HOSTNAME=.*/KUBELET_HOSTNAME=\"--hostname-override=${HOSTNAME}\"/" /etc/kubernetes/kubelet
 sed -i '/\[Service\]/a Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=systemd --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock"' /etc/systemd/system/kubelet.service.d/kubeadm.conf
-sed -i "/^KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=\"--node-ip=$IP\"" /etc/kubernetes/kubelet
-grep -q "^KUBELET_EXTRA_ARGS=" /etc/kubernetes/kubelet || echo "KUBELET_EXTRA_ARGS=\"--node-ip=$IP\"" >> /etc/kubernetes/kubelet
 
 # Disable the firewalld service.
 systemctl disable --now firewalld
