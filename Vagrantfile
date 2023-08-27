@@ -75,6 +75,7 @@ Vagrant.configure("2") do |config|
       # Provision the VM using shell scripts
       node.vm.provision "shell", path: "node.sh", args: ["k8s-node-#{i}", "192.168.0.#{70 + i}"]
       node.vm.provision :reload
+      node.vm.provision "shell", path: "node-nfs.sh"
     end
   end
 end
