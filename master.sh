@@ -50,3 +50,23 @@ kubectl get pods -A -o wide
 mkdir -p /home/vagrant/.kube
 cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
 chown -R vagrant:vagrant /home/vagrant/.kube
+
+# Persistent Volumes using NFS
+# Installing NFS
+dnf install -y nfs-utils
+
+# Create the directory that will be shared with the worker nodes.
+mkdir -p /nfs/data
+
+# Granting permissions to the folder
+chmod 777 /nfs/data
+
+# Add NFS configuration to /etc/exports
+echo "/nfs/data    *(rw,sync,no_subtree_check)" >> /etc/exports
+
+# Enable NFS service
+systemctl enable nfs-server
+systemctl start nfs-server
+
+# Apply NFS configuration
+exportfs -ra
