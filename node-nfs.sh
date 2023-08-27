@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x  # Enable debugging mode.
 
 # Persistent Volumes using NFS
 # Installing NFS
