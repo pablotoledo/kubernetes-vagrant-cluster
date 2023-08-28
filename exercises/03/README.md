@@ -9,7 +9,7 @@ The current NFS mounted volume at nodes are in `/mnt/nfs/data`
 
 ## Setting up the PersistentVolume and PersistentVolumeClaim
 
-The __PersistentVolume__ represents a piece of storage in the cluster that has been provisioned by an administrator. It is a resource in the cluster just like a node is a cluster resource. In this repository the NFS server is provided by the master node in the worker nodes at `/mnt/nfs/data` directory.
+The __PersistentVolume__ represents a piece of storage in the cluster that has been provisioned by an administrator. It is a resource in the cluster just like a node is a cluster resource. In this repository the NFS server is provided by the master node at `/nfs/data` and the PersistentVolume will be created using this path (_masterIP:/nfs/data_).
 
 The __PersistentVolumeClaim__ is a request for storage by a user. It is similar to a pod. Pods consume node resources and PVCs consume PV resources. Pods can request specific levels of resources (CPU and Memory). Claims can request specific size and access modes (e.g., can be mounted once read/write or many times read-only).
 
