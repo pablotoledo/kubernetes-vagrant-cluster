@@ -7,5 +7,5 @@ The following activities comes from different learning paths found in Youtube, G
 From 1 to 15, the activities are from [peladonerd](https://github.com/pablokbs/peladonerd/tree/master/kubernetes/35) based in this YouTube [video](https://www.youtube.com/watch?v=DCoBcpOA7W4)
 
 * 01 - [Deploy a nginx pod](./01/README.md)
-* 02 - [Deploy a nginx Pod with a deployment and daemonset](./02/README.md)
+* 02 - [Deploy a nginx Pod with a Deployment and DaemonSet](./02/README.md)
 * 03 - [StatefulSet and PersistentVolume](./03/README.md)

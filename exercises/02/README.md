@@ -50,7 +50,7 @@ When we want to see the yaml of a deployed resource we can use `kubectl get pod 
 
 ## Deploying a Pod with a deployment
 
-This yaml defines a nginx Pod deployed with a deployment:
+This yaml defines a nginx Pod deployed with a Deployment:
 
 ``` yaml
 apiVersion: apps/v1
@@ -119,9 +119,9 @@ __Deployments are the recommended way to deploy pods in k8s.__
 
 _If we want to deleted this deployment we just need to type `kubectl delete -f 02-deployment.yaml`_
 
-## Deploy a nginx Pod with a daemonset
+## Deploy a nginx Pod with a DaemonSet
 
-The main difference between a deployment and a daemonset is that a daemonset will deploy a pod in each node of the cluster. It's recomended in monitoring services like prometheus or datadog. A Daemonset is very similar to a deployment but without the `replicas` option.
+The main difference between a Deployment and a DaemonSet is that a DaemonSet will deploy a pod in each node of the cluster. It's recomended in monitoring services like prometheus or datadog. A Daemonset is very similar to a deployment but without the `replicas` option.
 
 This yaml defines a nginx Pod deployed with a daemonset:
 
