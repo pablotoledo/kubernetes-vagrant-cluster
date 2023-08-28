@@ -29,13 +29,13 @@ The proposed Kubernetes cluster setup comprises:
     - The control plane node that manages the Kubernetes cluster.
     - Configured with more resources to effectively manage the cluster operations.
     - IP: `192.168.0.70`
-    - NFS Server installed and configured to share `/mnt/nfs/data` folder.
+    - NFS Server installed and configured to share `/nfs/data` folder.
 
 2. **Worker Nodes (k8s-node-1, k8s-node-2)**:
     - Nodes where your applications will run.
     - Scalable configuration: By default, two worker nodes are provisioned, but the setup can be easily adjusted to spawn more or fewer nodes as needed.
     - IPs: Starting from `192.168.0.71` and incrementing for each subsequent worker node.
-    - Integrated with the NFS Server in the master node.
+    - Integrated with the NFS Server in the master node in `/mnt/nfs/data`.
 
 ### Operating System
 The nodes in this cluster are provisioned using **Fedora 38**. Fedora was chosen for its robustness, up-to-date packages, and compatibility with Kubernetes.
