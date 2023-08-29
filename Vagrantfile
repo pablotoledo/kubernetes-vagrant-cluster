@@ -58,6 +58,10 @@ Vagrant.configure("2") do |config|
     # Provision the VM using shell scripts and other provisioning methods
     master.vm.provision "shell", path: "node.sh", args: ["k8s-master", "192.168.0.70"]
     master.vm.provision :reload
+    master.vm.provision "shell", inline: <<-SHELL
+      echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+      chattr +i /etc/resolv.conf
+    SHELL
     master.vm.provision "shell", path: "master.sh"
   end
 
@@ -76,6 +80,10 @@ Vagrant.configure("2") do |config|
       node.vm.provision "shell", path: "node.sh", args: ["k8s-node-#{i}", "192.168.0.#{70 + i}"]
       node.vm.provision :reload
       node.vm.provision "shell", path: "node-nfs.sh"
+      node.vm.provision "shell", inline: <<-SHELL
+        echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+        chattr +i /etc/resolv.conf
+      SHELL
       node.vm.provision :reload
     end
   end
