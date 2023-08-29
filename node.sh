@@ -61,6 +61,7 @@ systemctl disable --now systemd-resolved
 sed -i 's/^dns=.*/dns=default/' /etc/NetworkManager/NetworkManager.conf
 unlink /etc/resolv.conf
 touch /etc/resolv.conf
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
 # Initialize Kubernetes.
 sleep 20  # Pause for 20 seconds.
