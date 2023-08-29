@@ -8,4 +8,5 @@ From 1 to 15, the activities are from [peladonerd](https://github.com/pablokbs/p
 
 * 01 - [Deploy a nginx pod](./01/README.md)
 * 02 - [Deploy a nginx Pod with a Deployment and DaemonSet](./02/README.md)
-* 03 - [StatefulSet and PersistentVolume](./03/README.md)
+* 03 - [StatefulSet, PersistentVolume and PersistenVolumeClaims](./03/README.md)
+* 04 - [Networking in K8s - K8s Services: ClusterIP, NodePort and LoadBalancer](./04/README.md)
