@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: ubuntu
-    image: ubuntu
+    image: nicolaka/netshoot
     args:
     - sleep
     - infinity

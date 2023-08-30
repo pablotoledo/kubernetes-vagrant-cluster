@@ -80,6 +80,9 @@ kubeadm join 192.168.0.70:6443 --token ye7mrv.wb3y5tvfml5h28i6 --discovery-token
 
 Important: When specifying the `--apiserver-advertise-address` flag, it's essential to declare the domestic network IP assigned to the node. Failing to do so might cause the node to use the eth0 network, which Vagrant employs. This oversight can lead to issues on the master node because eth0 has the same IP on all machines. As a result, the master might refer to itself, causing connectivity issues.
 
+## Activities
+
+This repository also contains a set of activities to help you get started with Kubernetes. The activities are in the `exercises` directory. [README.md](./exercises/README.md) contains a list of all the activities and their descriptions.
 
 ## Note
 Please remember, this setup is designed for educational purposes. It's crucial to understand each script's workings and modify them according to your specific requirements before deploying in any other environment.
