@@ -20,6 +20,7 @@ end
 Vagrant.configure("2") do |config|
   
   # Define the box to be used and its settings
+  # TODO: rocky linux and remove dnf
   config.vm.box = "fedora/38-cloud-base"
   # Define the synced folder from the host to the guest
   config.vm.synced_folder ".", "/vagrant", disabled: false
