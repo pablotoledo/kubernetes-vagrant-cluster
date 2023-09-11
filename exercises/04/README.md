@@ -102,6 +102,7 @@ Events:            <none>
 
 So as we can see in the previous output, the Service has an IP address. And is possible to see how it works and K8s will redirect to different Pods using the following command `watch curl http://IP:PORT` from the Ubuntu Pod `kubectl exec -it ubuntu -- bash`.`
 
+The other aspect to take into account is how _Cluster IP_ is also creating a DNS entry for the Service. So, we can use the following command `watch curl http://hello.default.svc.cluster.local:port` from the Ubuntu Pod `kubectl exec -it ubuntu -- bash` to check how it works. Or directly from the web browser using `http://hello.default.svc.cluster.local:port`. If you don't know wich IP is using any of the nodes, you can use `kubectl get nodes -o wide` to check the IP address of each node.
 
 ### NodePort
 
