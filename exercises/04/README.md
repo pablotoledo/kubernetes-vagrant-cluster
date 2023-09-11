@@ -19,6 +19,8 @@ There are 3 main types of Services:
 * __NodePort__: Exposes the Service on each Node's IP at a static port (the NodePort). A ClusterIP Service, to which the NodePort Service routes, is automatically created. You'll be able to contact the NodePort Service, from outside the cluster, by requesting `<NodeIP>:<NodePort>`.
 * __LoadBalancer__: Exposes the Service externally using a cloud provider's load balancer. NodePort and ClusterIP Services, to which the external load balancer routes, are automatically created.
 
+Independent of the ServiceType, K8s will create an internal DNS entry for the Service. So, you can use the following format to access to the Service: `<service-name>.<namespace>.svc.cluster.local`. This DNS is only available inside the cluster.
+
 ## Activities with K8s Services
 
 The following activities will be using a Pod with Ubuntu in order to have the internal point of view of the cluster. The Pod will be created using the following yaml file, called `04-ubuntu-pod.yaml`:
