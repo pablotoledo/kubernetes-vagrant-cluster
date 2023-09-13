@@ -78,7 +78,13 @@ For example, if you wish to join `k8s-node-1` to the cluster, you'll run the fol
 kubeadm join 192.168.0.70:6443 --token ye7mrv.wb3y5tvfml5h28i6 --discovery-token-ca-cert-hash sha256:54b4d8feb39efdad99a55c365b3cd6be3e746f15230736e4d73f6784bd875ce7 --apiserver-advertise-address=192.168.0.71
 ```
 
-Important: When specifying the `--apiserver-advertise-address` flag, it's essential to declare the domestic network IP assigned to the node. Failing to do so might cause the node to use the eth0 network, which Vagrant employs. This oversight can lead to issues on the master node because eth0 has the same IP on all machines. As a result, the master might refer to itself, causing connectivity issues.
+__Important:__ When specifying the `--apiserver-advertise-address` flag, it's essential to declare the domestic network IP assigned to the node. Failing to do so might cause the node to use the eth0 network, which Vagrant employs. This oversight can lead to issues on the master node because eth0 has the same IP on all machines. As a result, the master might refer to itself, causing connectivity issues.
+
+__Tip:__ When you need to know the kubeadm join command, you can use the following command on the master node:
+
+```bash
+kubeadm token create --print-join-command
+``` 
 
 ## Activities
 
