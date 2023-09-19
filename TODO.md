@@ -6,4 +6,4 @@ Pending topics
 - [ ] Cordon y Uncordon
 - [ ] Certificados
 - [ ] Taints
-- [ ] 
+- [ ] ingress nginx + nodeport
