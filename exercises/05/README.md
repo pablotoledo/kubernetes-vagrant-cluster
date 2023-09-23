@@ -61,5 +61,32 @@ spec:
 
 ## Consuming ConfigMaps and Secrets as command-line arguments
 
+__Explanation:__ Using ConfigMaps and Secrets as command-line arguments can be done by referring them in the `args` or `command` field of the Pod spec.
+
+__Example:__ Using the above ConfigMap and Secret:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-pod
+spec:
+  containers:
+  - name: app-container
+    image: nginx:latest
+    args: ["--mode=$(APP_MODE)", "--secret=$(APP_SECRET)"]
+    env:
+    - name: APP_MODE
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: APP_MODE
+    - name: APP_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: app-secret
+          key: APP_SECRET
+```
+
 ## Consuming ConfigMaps and Secrets as configuration files in a volume
 
