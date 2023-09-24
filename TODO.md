@@ -1,5 +1,5 @@
 Pending topics
-- [ ] Exercise 5 - In progress
+- [x] Exercise 5 - In progress
 - [ ] KEBA + Azure
 - [ ] Cronjobs
 - [ ] Lens y K8s Dashboard

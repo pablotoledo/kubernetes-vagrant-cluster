@@ -63,18 +63,18 @@ spec:
 
 __Explanation:__ Using ConfigMaps and Secrets as command-line arguments can be done by referring them in the `args` or `command` field of the Pod spec.
 
-__Example:__ Using the above ConfigMap and Secret:
+__Example:__ Using the above ConfigMap and Secret we can create a file called `app-pod-cmline.yaml` with the following content and apply using `kubectl apply -f app-pod-cmline.yaml`:
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: app-pod
+  name: app-pod-cmline
 spec:
   containers:
-  - name: app-container
-    image: nginx:latest
-    args: ["--mode=$(APP_MODE)", "--secret=$(APP_SECRET)"]
+  - name: app-container-cmline
+    image: busybox
+    args: [ "sh", "-c", "echo Mode: $APP_MODE; echo Secret: $APP_SECRET; sleep 3600" ]
     env:
     - name: APP_MODE
       valueFrom:
@@ -88,5 +88,41 @@ spec:
           key: APP_SECRET
 ```
 
+If we get the logs of the pod we can see the following:
+
+```bash
+$ kubectl logs app-pod-cmline
+Mode: production
+Secret: secretpassword
+```
+
 ## Consuming ConfigMaps and Secrets as configuration files in a volume
 
+__Explanation:__ ConfigMaps and Secrets can be used to create files inside a volume. Each key-value pair in the ConfigMap/Secret will be used to create an individual file with the key's name and the corresponding value.
+
+__Example:__ Using the above ConfigMap and Secret we can create a file called `app-pod-volume.yaml` with the following content and apply using `kubectl apply -f app-pod-volume.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-pod-volume
+spec:
+  containers:
+  - name: app-container
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do sleep 3600; done"]
+    volumeMounts:
+    - name: config-volume
+      mountPath: /etc/config
+    - name: secret-volume
+      mountPath: /etc/secrets
+  volumes:
+  - name: config-volume
+    configMap:
+      name: app-config
+  - name: secret-volume
+    secret:
+      secretName: app-secret
+```
