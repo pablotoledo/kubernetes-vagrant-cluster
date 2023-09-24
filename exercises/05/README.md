@@ -126,3 +126,13 @@ spec:
     secret:
       secretName: app-secret
 ```
+
+If we get the content of the volume we can see the following:
+
+```bash
+$ kubectl exec -it app-pod-volume -- ls /etc/config
+APP_MODE
+
+$ kubectl exec -it app-pod-volume -- cat /etc/config/APP_MODE
+production
+```
