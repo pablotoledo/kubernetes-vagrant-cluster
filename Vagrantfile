@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
   # TODO: rocky linux and remove dnf
   config.vm.box = "fedora/38-cloud-base"
   # Define the synced folder from the host to the guest
-  config.vm.synced_folder ".", "/vagrant", disabled: false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   # General settings for the VirtualBox provider
   config.vm.provider "virtualbox" do |v|
@@ -50,9 +50,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "k8s-master" do |master|
     master.vm.hostname = "k8s-master"
     # Network settings for the master node
-    master.vm.network "public_network", bridge: "Realtek 8812BU Wireless LAN 802.11ac USB NIC", ip: "192.168.0.70"
+    master.vm.network "public_network", bridge: "Realtek PCIe GbE Family Controller", ip: "192.168.0.70"
     master.vm.provider "virtualbox" do |vb|
-      vb.memory = "8192"   # Assign 8GB RAM to the master VM
+      vb.memory = "4096"   # Assign 8GB RAM to the master VM
       vb.cpus = 4   # Assign 4 CPUs to the master VM
       vb.name = "k8s-master"
     end
