@@ -25,6 +25,8 @@ Vagrant.configure("2") do |config|
   # Define the synced folder from the host to the guest
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
+  config.vm.boot_timeout = 6000
+
   # General settings for the VirtualBox provider
   config.vm.provider "virtualbox" do |v|
     v.default_nic_type = "82540EM"
@@ -45,7 +47,7 @@ Vagrant.configure("2") do |config|
     # Allow bidirectional clipboard access between host and VM
     vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
   end
-
+  #Realtek 8812BU Wireless LAN 802.11ac USB NIC
   # Master node configuration
   config.vm.define "k8s-master" do |master|
     master.vm.hostname = "k8s-master"
@@ -69,11 +71,12 @@ Vagrant.configure("2") do |config|
   # Worker nodes configuration
   (1..2).each do |i|
     config.vm.define "k8s-node-#{i}" do |node|
+      node.vm.boot_timeout = 6000
       node.vm.hostname = "k8s-node-#{i}"
       # Network settings for the worker nodes
-      node.vm.network "public_network", bridge: "Realtek 8812BU Wireless LAN 802.11ac USB NIC", ip: "192.168.0.#{70 + i}"
+      node.vm.network "public_network", bridge: "Realtek PCIe GbE Family Controller", ip: "192.168.0.#{70 + i}"
       node.vm.provider "virtualbox" do |vb|
-        vb.memory = "12288"   # Assign 12GB RAM to each worker VM
+        vb.memory = "32768"   # Assign 12GB RAM to each worker VM
         vb.cpus = 8   # Assign 8 CPUs to each worker VM
         vb.name = "k8s-node-#{i}"
       end
