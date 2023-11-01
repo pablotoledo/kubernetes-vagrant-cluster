@@ -47,12 +47,12 @@ Vagrant.configure("2") do |config|
     # Allow bidirectional clipboard access between host and VM
     vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
   end
-  #Realtek 8812BU Wireless LAN 802.11ac USB NIC
+  #Realtek 8812BU Wireless LAN 802.11ac USB NIC | Realtek PCIe GbE Family Controller
   # Master node configuration
   config.vm.define "k8s-master" do |master|
     master.vm.hostname = "k8s-master"
     # Network settings for the master node
-    master.vm.network "public_network", bridge: "Realtek PCIe GbE Family Controller", ip: "192.168.0.70"
+    master.vm.network "public_network", bridge: "Realtek 8812BU Wireless LAN 802.11ac USB NIC", ip: "192.168.0.70"
     master.vm.provider "virtualbox" do |vb|
       vb.memory = "4096"   # Assign 8GB RAM to the master VM
       vb.cpus = 4   # Assign 4 CPUs to the master VM
@@ -74,7 +74,7 @@ Vagrant.configure("2") do |config|
       node.vm.boot_timeout = 6000
       node.vm.hostname = "k8s-node-#{i}"
       # Network settings for the worker nodes
-      node.vm.network "public_network", bridge: "Realtek PCIe GbE Family Controller", ip: "192.168.0.#{70 + i}"
+      node.vm.network "public_network", bridge: "Realtek 8812BU Wireless LAN 802.11ac USB NIC", ip: "192.168.0.#{70 + i}"
       node.vm.provider "virtualbox" do |vb|
         vb.memory = "32768"   # Assign 12GB RAM to each worker VM
         vb.cpus = 8   # Assign 8 CPUs to each worker VM
