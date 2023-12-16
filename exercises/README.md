@@ -15,5 +15,5 @@ From 01 to 06, the activities are from [peladonerd](https://github.com/pablokbs/
 
 From 07 the activities are mine. Based in personal experience using this cluster and some of them are created to document some activities that I have to do in my job.
 
-* 07 -
+* 07 - Installing Prometheus Metrics
 
